@@ -31,8 +31,8 @@ trait HasSourcedAttributes
                 }
 
                 $relation->orderByDesc('priority')
-                    ->orderBy('created_at')
-                    ->orderBy('id');
+                    ->orderByDesc('created_at')
+                    ->orderByDesc('id');
             },
         ]);
     }
@@ -182,7 +182,7 @@ trait HasSourcedAttributes
             . "where sa.sourceable_type = ? "
             . "and sa.sourceable_id = {$qualifiedKey} "
             . "and sa.sourceable_attribute = ? "
-            . "order by sa.priority desc, sa.created_at asc, sa.id asc "
+            . "order by sa.priority desc, sa.created_at desc, sa.id desc "
             . "limit 1";
 
         return $query->whereRaw(
@@ -259,16 +259,16 @@ trait HasSourcedAttributes
                 ->where('sourceable_attribute', $attribute)
                 ->sortBy([
                     ['priority', 'desc'],
-                    ['created_at', 'asc'],
-                    ['id', 'asc'],
+                    ['created_at', 'desc'],
+                    ['id', 'desc'],
                 ])
                 ->first();
         } else {
             $record = $this->sourcedAttributes()
                 ->where('sourceable_attribute', $attribute)
                 ->orderByDesc('priority')
-                ->orderBy('created_at')
-                ->orderBy('id')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
                 ->first();
         }
 

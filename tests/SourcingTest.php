@@ -28,7 +28,7 @@ it('overrides an attribute with a direct literal value', function () {
     expect($target->fresh()->name)->toBe('Controller Value');
 });
 
-it('uses highest priority and oldest created_at as tie breaker', function () {
+it('uses highest priority and newest created_at as tie breaker', function () {
     $sourceA = TestPerson::create([
         'name' => 'source-a',
         'data' => ['FirstName' => 'Priority 1'],
@@ -54,7 +54,7 @@ it('uses highest priority and oldest created_at as tie breaker', function () {
     $records[1]->update(['created_at' => Carbon::parse('2026-01-01 00:00:00')]);
     $records[2]->update(['created_at' => Carbon::parse('2026-01-01 00:10:00')]);
 
-    expect($target->fresh()->name)->toBe('Priority 5 old');
+    expect($target->fresh()->name)->toBe('Priority 5 new');
 });
 
 it('updates existing value source record when recalled', function () {
