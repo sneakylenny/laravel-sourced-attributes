@@ -261,3 +261,41 @@ it('can configure sourced override usage default globally via config', function 
 
     config()->set('sourced-attributes.overrides_default', true);
 });
+
+it('can eager load sourced attributes for bulk reads', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName');
+
+    $models = TestPerson::query()
+        ->whereKey($target->id)
+        ->withSourcedAttributes(['name'])
+        ->get();
+
+    $model = $models->first();
+
+    expect($model->relationLoaded('sourcedAttributes'))->toBeTrue()
+        ->and($model->name)->toBe('Sourced Name');
+});
+
+it('can skip effective source subquery when disabled for query filtering', function () {
+    $baseMatch = TestPerson::create(['name' => 'Alpha']);
+    $overrideOnly = TestPerson::create(['name' => 'Beta']);
+
+    $overrideOnly->sourceAttribute('name')->value('Alpha', ['priority' => 10]);
+
+    $ids = TestPerson::query()
+        ->whereEffectiveWhen(false, 'name', 'Alpha')
+        ->orderBy('id')
+        ->pluck('id')
+        ->all();
+
+    expect($ids)->toBe([$baseMatch->id]);
+});

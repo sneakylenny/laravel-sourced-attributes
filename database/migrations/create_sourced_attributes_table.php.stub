@@ -25,6 +25,7 @@ return new class extends Migration
 
             $table->index(['sourceable_type', 'sourceable_id', 'sourceable_attribute'], 'src_attr_lookup_idx');
             $table->index(['sourceable_type', 'sourceable_id', 'sourceable_attribute', 'priority'], 'src_attr_priority_idx');
+            $table->index(['origin_type', 'origin_id'], 'src_attr_origin_idx');
         });
     }
 

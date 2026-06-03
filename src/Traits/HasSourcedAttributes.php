@@ -22,6 +22,21 @@ trait HasSourcedAttributes
         return new PendingSourcedAttribute($this, $attribute);
     }
 
+    public function scopeWithSourcedAttributes(Builder $query, ?array $attributes = null): Builder
+    {
+        return $query->with([
+            'sourcedAttributes' => function ($relation) use ($attributes) {
+                if ($attributes !== null && $attributes !== []) {
+                    $relation->whereIn('sourceable_attribute', $attributes);
+                }
+
+                $relation->orderByDesc('priority')
+                    ->orderBy('created_at')
+                    ->orderBy('id');
+            },
+        ]);
+    }
+
     public function withOverrides(): static
     {
         $this->overridesState = true;
@@ -74,7 +89,7 @@ trait HasSourcedAttributes
 
         $updated = 0;
 
-        foreach ($query->get() as $record) {
+        foreach ($query->cursor() as $record) {
             if (! $record->origin) {
                 continue;
             }
@@ -142,6 +157,28 @@ trait HasSourcedAttributes
             "coalesce(({$winnerValueSql}), {$qualifiedAttribute}) {$operator} ?",
             [$modelClass, $attribute, $value]
         );
+    }
+
+    public function scopeWhereEffectiveWhen(Builder $query, bool $enabled, string $attribute, mixed $operator, mixed $value = null): Builder
+    {
+        app(SourcedAttributes::class)->ensureAttributeName($attribute);
+
+        if (func_num_args() === 4) {
+            $value = $operator;
+            $operator = '=';
+        }
+
+        $operator = strtolower((string) $operator);
+
+        if (! in_array($operator, app(SourcedAttributes::class)->allowedOperators(), true)) {
+            throw new InvalidArgumentException("Unsupported operator [{$operator}] for whereEffectiveWhen.");
+        }
+
+        if (! $enabled) {
+            return $query->where($this->qualifyColumn($attribute), $operator, $value);
+        }
+
+        return $this->scopeWhereEffective($query, $attribute, $operator, $value);
     }
 
     protected function shouldResolveSourcedAttribute(string $key): bool
