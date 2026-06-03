@@ -112,6 +112,9 @@ trait HasSourcedAttributes
             return [false, null];
         }
 
-        return [true, $record->value];
+        return [
+            true,
+            app(SourcedAttributes::class)->applyCast($this, $attribute, $record->value, $record->cast),
+        ];
     }
 }

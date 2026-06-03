@@ -11,6 +11,7 @@ class SourcedAttribute extends Model
 
     protected $casts = [
         'priority' => 'integer',
+        'cast' => 'string',
     ];
 
     public function __construct(array $attributes = [])
