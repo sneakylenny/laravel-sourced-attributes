@@ -30,19 +30,116 @@ it('overrides an attribute with a direct literal value', function () {
 });
 
 it('uses highest priority and oldest created_at as tie breaker', function () {
+    $sourceA = TestPerson::create([
+        'name' => 'source-a',
+        'data' => ['FirstName' => 'Priority 1'],
+    ]);
+    $sourceB = TestPerson::create([
+        'name' => 'source-b',
+        'data' => ['FirstName' => 'Priority 5 old'],
+    ]);
+    $sourceC = TestPerson::create([
+        'name' => 'source-c',
+        'data' => ['FirstName' => 'Priority 5 new'],
+    ]);
+
     $target = TestPerson::create([
         'name' => 'Original Name',
     ]);
 
-    $target->sourceAttribute('name')->value('Priority 1', ['priority' => 1]);
-    $target->sourceAttribute('name')->value('Priority 5 old', ['priority' => 5]);
-    $target->sourceAttribute('name')->value('Priority 5 new', ['priority' => 5]);
+    $target->sourceAttribute('name')->from($sourceA, 'data.FirstName', ['priority' => 1]);
+    $target->sourceAttribute('name')->from($sourceB, 'data.FirstName', ['priority' => 5]);
+    $target->sourceAttribute('name')->from($sourceC, 'data.FirstName', ['priority' => 5]);
 
     $records = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->orderBy('id')->get();
     $records[1]->update(['created_at' => Carbon::parse('2026-01-01 00:00:00')]);
     $records[2]->update(['created_at' => Carbon::parse('2026-01-01 00:10:00')]);
 
     expect($target->fresh()->name)->toBe('Priority 5 old');
+});
+
+it('updates existing value source record when recalled', function () {
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->value('First Value', ['priority' => 1]);
+    $target->sourceAttribute('name')->value('Second Value', ['priority' => 10]);
+
+    $record = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->first();
+
+    expect($target->sourcedAttributes()->where('sourceable_attribute', 'name')->count())->toBe(1)
+        ->and($record->value)->toBe('Second Value')
+        ->and($record->priority)->toBe(10)
+        ->and($target->fresh()->name)->toBe('Second Value');
+});
+
+it('updates existing origin source record when recalled', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName', ['priority' => 1]);
+    $target->sourceAttribute('name')->from($source, 'data.FirstName', ['priority' => 9]);
+
+    $record = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->first();
+
+    expect($target->sourcedAttributes()->where('sourceable_attribute', 'name')->count())->toBe(1)
+        ->and($record->priority)->toBe(9)
+        ->and($target->fresh()->name)->toBe('Sourced Name');
+});
+
+it('can sync sourced attribute snapshots from origin records', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName');
+    $source->update(['data' => ['FirstName' => 'Renamed']]);
+
+    expect($target->fresh()->name)->toBe('Sourced Name');
+
+    $updated = $target->syncSourcedAttribute('name');
+
+    expect($updated)->toBe(1)
+        ->and($target->fresh()->name)->toBe('Renamed');
+});
+
+it('updates sourced record and target value after origin changes and sync runs', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Initial'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName');
+
+    $record = $target->sourcedAttributes()->where('sourceable_attribute', 'name')->first();
+
+    expect($record->value)->toBe('Initial')
+        ->and($target->fresh()->name)->toBe('Initial');
+
+    $source->update(['data' => ['FirstName' => 'Updated by Origin']]);
+
+    $changed = $target->syncSourcedAttribute('name');
+    $record->refresh();
+
+    expect($changed)->toBe(1)
+        ->and($record->value)->toBe('Updated by Origin')
+        ->and($target->fresh()->name)->toBe('Updated by Origin');
 });
 
 it('can filter by effective value with whereEffective', function () {
@@ -87,6 +184,6 @@ it('rejects non cast classes passed as a sourced cast', function () {
         'name' => 'Original Name',
     ]);
 
-    expect(fn () => $target->sourceAttribute('name')->value('X', ['cast' => \stdClass::class]))
+    expect(fn() => $target->sourceAttribute('name')->value('X', ['cast' => \stdClass::class]))
         ->toThrow(\InvalidArgumentException::class, 'is not a valid Laravel cast');
 });

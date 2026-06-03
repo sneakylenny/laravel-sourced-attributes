@@ -20,6 +20,44 @@ trait HasSourcedAttributes
         return new PendingSourcedAttribute($this, $attribute);
     }
 
+    public function syncSourcedAttribute(string $attribute): int
+    {
+        return $this->syncSourcedAttributes($attribute);
+    }
+
+    public function syncSourcedAttributes(?string $attribute = null): int
+    {
+        $query = $this->sourcedAttributes()
+            ->whereNotNull('origin_type')
+            ->whereNotNull('origin_id');
+
+        if ($attribute !== null) {
+            app(SourcedAttributes::class)->ensureAttributeName($attribute);
+            $query->where('sourceable_attribute', $attribute);
+        }
+
+        $updated = 0;
+
+        foreach ($query->get() as $record) {
+            if (! $record->origin) {
+                continue;
+            }
+
+            $freshValue = data_get($record->origin, $record->origin_attribute);
+
+            if ($freshValue !== $record->value) {
+                $record->update(['value' => $freshValue]);
+                $updated++;
+            }
+        }
+
+        if ($this->relationLoaded('sourcedAttributes')) {
+            $this->unsetRelation('sourcedAttributes');
+        }
+
+        return $updated;
+    }
+
     public function getAttributeValue($key): mixed
     {
         $value = parent::getAttributeValue($key);

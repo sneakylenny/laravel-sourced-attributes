@@ -20,29 +20,37 @@ class PendingSourcedAttribute
         app(SourcedAttributes::class)->ensurePersisted($origin);
         $cast = app(SourcedAttributes::class)->normalizeCast($options['cast'] ?? null);
 
-        return $this->target->sourcedAttributes()->create([
-            'sourceable_attribute' => $this->attribute,
-            'origin_type' => $origin::class,
-            'origin_id' => $origin->getKey(),
-            'origin_attribute' => $originAttribute,
-            'value' => data_get($origin, $originAttribute),
-            'cast' => $cast,
-            'priority' => (int) ($options['priority'] ?? app(SourcedAttributes::class)->defaultPriority()),
-        ]);
+        return $this->target->sourcedAttributes()->updateOrCreate(
+            [
+                'sourceable_attribute' => $this->attribute,
+                'origin_type' => $origin::class,
+                'origin_id' => $origin->getKey(),
+                'origin_attribute' => $originAttribute,
+            ],
+            [
+                'value' => data_get($origin, $originAttribute),
+                'cast' => $cast,
+                'priority' => (int) ($options['priority'] ?? app(SourcedAttributes::class)->defaultPriority()),
+            ]
+        );
     }
 
     public function value(mixed $value, array $options = []): SourcedAttribute
     {
         $cast = app(SourcedAttributes::class)->normalizeCast($options['cast'] ?? null);
 
-        return $this->target->sourcedAttributes()->create([
-            'sourceable_attribute' => $this->attribute,
-            'origin_type' => null,
-            'origin_id' => null,
-            'origin_attribute' => null,
-            'value' => $value,
-            'cast' => $cast,
-            'priority' => (int) ($options['priority'] ?? app(SourcedAttributes::class)->defaultPriority()),
-        ]);
+        return $this->target->sourcedAttributes()->updateOrCreate(
+            [
+                'sourceable_attribute' => $this->attribute,
+                'origin_type' => null,
+                'origin_id' => null,
+                'origin_attribute' => null,
+            ],
+            [
+                'value' => $value,
+                'cast' => $cast,
+                'priority' => (int) ($options['priority'] ?? app(SourcedAttributes::class)->defaultPriority()),
+            ]
+        );
     }
 }
