@@ -2,6 +2,8 @@
 
 namespace SneakyLenny\SourcedAttributes;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Event;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use SneakyLenny\SourcedAttributes\Commands\SourcedAttributesCommand;
@@ -26,5 +28,18 @@ class SourcedAttributesServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         $this->app->singleton(SourcedAttributes::class, fn(): SourcedAttributes => new SourcedAttributes);
+    }
+
+    public function packageBooted(): void
+    {
+        Event::listen('eloquent.updated: *', function (string $eventName, array $payload): void {
+            $model = $payload[0] ?? null;
+
+            if (! $model instanceof Model) {
+                return;
+            }
+
+            app(SourcedAttributes::class)->syncFromOrigin($model);
+        });
     }
 }

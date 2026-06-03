@@ -321,3 +321,37 @@ it('does not resolve non-model sourced attributes when overrides are disabled', 
 
     expect($model->label)->toBeNull();
 });
+
+it('auto syncs sourced snapshots on origin update when auto_sync is enabled', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName', ['auto_sync' => true]);
+
+    $source->update(['data' => ['FirstName' => 'Auto Synced']]);
+
+    expect($target->fresh()->name)->toBe('Auto Synced');
+});
+
+it('does not auto sync sourced snapshots by default', function () {
+    $source = TestPerson::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
+    ]);
+
+    $target = TestPerson::create([
+        'name' => 'Original Name',
+    ]);
+
+    $target->sourceAttribute('name')->from($source, 'data.FirstName');
+
+    $source->update(['data' => ['FirstName' => 'Not Synced']]);
+
+    expect($target->fresh()->name)->toBe('Sourced Name');
+});

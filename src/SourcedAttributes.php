@@ -5,6 +5,7 @@ namespace SneakyLenny\SourcedAttributes;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Contracts\Database\Eloquent\CastsInboundAttributes;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -56,6 +57,16 @@ class SourcedAttributes
     public function defaultPriority(): int
     {
         return (int) config('sourced-attributes.default_priority', 0);
+    }
+
+    public function autoSyncEnabled(): bool
+    {
+        return (bool) config('sourced-attributes.auto_sync_enabled', true);
+    }
+
+    public function defaultAutoSync(): bool
+    {
+        return (bool) config('sourced-attributes.auto_sync_default', false);
     }
 
     public function ensurePersisted(Model $model): void
@@ -135,6 +146,36 @@ class SourcedAttributes
         $probe->setRawAttributes([$attribute => $value], true);
 
         return $probe->getAttribute($attribute);
+    }
+
+    public function syncFromOrigin(Model $origin): int
+    {
+        if (! $origin->exists || ! $this->autoSyncEnabled()) {
+            return 0;
+        }
+
+        /** @var class-string<Model> $modelClass */
+        $modelClass = $this->modelClass();
+
+        /** @var Collection<int, Model> $records */
+        $records = $modelClass::query()
+            ->where('origin_type', $origin::class)
+            ->where('origin_id', $origin->getKey())
+            ->where('auto_sync', true)
+            ->get();
+
+        $updated = 0;
+
+        foreach ($records as $record) {
+            $freshValue = data_get($origin, $record->origin_attribute);
+
+            if ($freshValue !== $record->value) {
+                $record->update(['value' => $freshValue]);
+                $updated++;
+            }
+        }
+
+        return $updated;
     }
 
     /**

@@ -12,6 +12,7 @@ class SourcedAttribute extends Model
     protected $casts = [
         'priority' => 'integer',
         'cast' => 'string',
+        'auto_sync' => 'boolean',
     ];
 
     public function __construct(array $attributes = [])
