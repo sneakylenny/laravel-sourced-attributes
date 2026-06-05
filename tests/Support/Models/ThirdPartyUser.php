@@ -3,13 +3,10 @@
 namespace SneakyLenny\SourcedAttributes\Tests\Support\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use SneakyLenny\SourcedAttributes\Traits\HasSourcedAttributes;
 
-class TestPerson extends Model
+class ThirdPartyUser extends Model
 {
-    use HasSourcedAttributes;
-
-    protected $table = 'test_people';
+    protected $table = 'third_party_users';
 
     protected $guarded = [];
 

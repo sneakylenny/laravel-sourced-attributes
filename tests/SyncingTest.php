@@ -2,16 +2,17 @@
 
 use Illuminate\Support\Facades\Queue;
 use SneakyLenny\SourcedAttributes\Jobs\SyncSourcedAttributesFromOrigin;
-use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPerson;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\ThirdPartyUser;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\User;
 
 it('can sync sourced attribute snapshots from origin records', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName');
@@ -26,13 +27,13 @@ it('can sync sourced attribute snapshots from origin records', function () {
 });
 
 it('updates sourced record and target value after origin changes and sync runs', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Initial'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Initial'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName');
@@ -53,13 +54,13 @@ it('updates sourced record and target value after origin changes and sync runs',
 });
 
 it('auto syncs sourced snapshots on origin update when auto_sync is enabled', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName', ['auto_sync' => true]);
@@ -70,13 +71,13 @@ it('auto syncs sourced snapshots on origin update when auto_sync is enabled', fu
 });
 
 it('does not auto sync sourced snapshots by default', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName');
@@ -90,13 +91,13 @@ it('dispatches queued auto sync job when queue mode is enabled', function () {
     Queue::fake();
     config()->set('sourced-attributes.auto_sync.queued', true);
 
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName', ['auto_sync' => true]);

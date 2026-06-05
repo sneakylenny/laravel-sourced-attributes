@@ -1,15 +1,16 @@
 <?php
 
 use Illuminate\Support\Carbon;
-use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPerson;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\ThirdPartyUser;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\User;
 
 it('overrides the default origin attribute with a model source path', function () {
-    $source = TestPerson::create([
-        'name' => 'Sourced Name',
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'Sourced Name',
     ]);
 
     $target->sourceAttribute('name')->from($source);
@@ -18,13 +19,13 @@ it('overrides the default origin attribute with a model source path', function (
 });
 
 it('overrides the default origin attribute with a nested model source path', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName');
@@ -33,7 +34,7 @@ it('overrides the default origin attribute with a nested model source path', fun
 });
 
 it('overrides an attribute with a direct literal value', function () {
-    $target = TestPerson::create([
+    $target = User::create([
         'name' => 'Original Name',
     ]);
 
@@ -43,21 +44,21 @@ it('overrides an attribute with a direct literal value', function () {
 });
 
 it('uses highest priority and newest created_at as tie breaker', function () {
-    $sourceA = TestPerson::create([
+    $target = User::create([
+        'name' => 'Original Name',
+    ]);
+
+    $sourceA = ThirdPartyUser::create([
         'name' => 'source-a',
         'data' => ['FirstName' => 'Priority 1'],
     ]);
-    $sourceB = TestPerson::create([
+    $sourceB = ThirdPartyUser::create([
         'name' => 'source-b',
         'data' => ['FirstName' => 'Priority 5 old'],
     ]);
-    $sourceC = TestPerson::create([
+    $sourceC = ThirdPartyUser::create([
         'name' => 'source-c',
         'data' => ['FirstName' => 'Priority 5 new'],
-    ]);
-
-    $target = TestPerson::create([
-        'name' => 'Original Name',
     ]);
 
     $target->sourceAttribute('name')->from($sourceA, 'data.FirstName', ['priority' => 1]);
@@ -72,7 +73,7 @@ it('uses highest priority and newest created_at as tie breaker', function () {
 });
 
 it('updates existing value source record when recalled', function () {
-    $target = TestPerson::create([
+    $target = User::create([
         'name' => 'Original Name',
     ]);
 
@@ -88,13 +89,13 @@ it('updates existing value source record when recalled', function () {
 });
 
 it('updates existing origin source record when recalled', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName', ['priority' => 1]);
@@ -108,14 +109,14 @@ it('updates existing origin source record when recalled', function () {
 });
 
 it('can filter by effective value with whereEffective', function () {
-    $baseMatch = TestPerson::create(['name' => 'Alpha']);
-    $overrideMatch = TestPerson::create(['name' => 'Beta']);
-    $noMatch = TestPerson::create(['name' => 'Gamma']);
+    $baseMatch = User::create(['name' => 'Alpha']);
+    $overrideMatch = User::create(['name' => 'Beta']);
+    $noMatch = User::create(['name' => 'Gamma']);
 
     $overrideMatch->sourceAttribute('name')->as('Alpha', ['priority' => 10]);
     $noMatch->sourceAttribute('name')->as('Zeta', ['priority' => 10]);
 
-    $ids = TestPerson::query()
+    $ids = User::query()
         ->whereEffective('name', 'Alpha')
         ->orderBy('id')
         ->pluck('id')
@@ -125,18 +126,18 @@ it('can filter by effective value with whereEffective', function () {
 });
 
 it('can eager load sourced attributes for bulk reads', function () {
-    $source = TestPerson::create([
+    $target = User::create([
+        'name' => 'Original Name',
+    ]);
+
+    $source = ThirdPartyUser::create([
         'name' => 'source',
         'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
-    ]);
-
     $target->sourceAttribute('name')->from($source, 'data.FirstName');
 
-    $models = TestPerson::query()
+    $models = User::query()
         ->whereKey($target->id)
         ->withSourcedAttributes(['name'])
         ->get();
@@ -148,13 +149,13 @@ it('can eager load sourced attributes for bulk reads', function () {
 });
 
 it('stores metadata with from meta chaining', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')
@@ -170,13 +171,13 @@ it('stores metadata with from meta chaining', function () {
 });
 
 it('stores metadata through options for literal and origin sources', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->as('Literal', ['meta' => ['type' => 'manual']]);
@@ -190,20 +191,20 @@ it('stores metadata through options for literal and origin sources', function ()
 });
 
 it('can keep original values while loading sourced attributes for frontend display', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')
         ->from($source, 'data.FirstName')
         ->meta(['provider' => 'entra']);
 
-    $model = TestPerson::query()
+    $model = User::query()
         ->whereKey($target->id)
         ->withSourcedAttributes(['name'])
         ->first()
@@ -216,12 +217,12 @@ it('can keep original values while loading sourced attributes for frontend displ
 });
 
 it('can skip effective source subquery when disabled for query filtering', function () {
-    $baseMatch = TestPerson::create(['name' => 'Alpha']);
-    $overrideOnly = TestPerson::create(['name' => 'Beta']);
+    $baseMatch = User::create(['name' => 'Alpha']);
+    $overrideOnly = User::create(['name' => 'Beta']);
 
     $overrideOnly->sourceAttribute('name')->as('Alpha', ['priority' => 10]);
 
-    $ids = TestPerson::query()
+    $ids = User::query()
         ->whereEffectiveWhen(false, 'name', 'Alpha')
         ->orderBy('id')
         ->pluck('id')

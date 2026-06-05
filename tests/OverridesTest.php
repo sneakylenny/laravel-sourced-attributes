@@ -1,16 +1,17 @@
 <?php
 
-use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPerson;
-use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPersonOverridesDisabled;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\ThirdPartyUser;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\User;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\UserOverridesDisabled;
 
 it('can toggle sourced attribute overrides on a model instance', function () {
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName');
@@ -27,13 +28,13 @@ it('can toggle sourced attribute overrides on a model instance', function () {
 });
 
 it('can configure sourced override usage default per model with a trait property', function () {
-    $source = TestPersonOverridesDisabled::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = UserOverridesDisabled::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPersonOverridesDisabled::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName');
@@ -52,13 +53,13 @@ it('can configure sourced override usage default per model with a trait property
 it('can configure sourced override usage default globally via config', function () {
     config()->set('sourced-attributes.overrides.enabled', false);
 
-    $source = TestPerson::create([
-        'name' => 'source',
-        'data' => ['FirstName' => 'Sourced Name'],
+    $target = User::create([
+        'name' => 'Original Name',
     ]);
 
-    $target = TestPerson::create([
-        'name' => 'Original Name',
+    $source = ThirdPartyUser::create([
+        'name' => 'source',
+        'data' => ['FirstName' => 'Sourced Name'],
     ]);
 
     $target->sourceAttribute('name')->from($source, 'data.FirstName');
@@ -77,7 +78,7 @@ it('can configure sourced override usage default globally via config', function 
 });
 
 it('can resolve sourced attributes that do not exist on the model', function () {
-    $target = TestPerson::create([
+    $target = User::create([
         'name' => 'Original Name',
     ]);
 
@@ -87,7 +88,7 @@ it('can resolve sourced attributes that do not exist on the model', function () 
 });
 
 it('does not resolve non-model sourced attributes when overrides are disabled', function () {
-    $target = TestPerson::create([
+    $target = User::create([
         'name' => 'Original Name',
     ]);
 

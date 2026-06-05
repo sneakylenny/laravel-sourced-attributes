@@ -35,7 +35,14 @@ class TestCase extends Orchestra
 
     protected function setUpDatabase(): void
     {
-        Schema::create('test_people', function ($table) {
+        Schema::create('users', function ($table) {
+            $table->id();
+            $table->string('name')->nullable();
+            $table->json('data')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('third_party_users', function ($table) {
             $table->id();
             $table->string('name')->nullable();
             $table->json('data')->nullable();

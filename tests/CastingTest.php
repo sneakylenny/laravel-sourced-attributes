@@ -1,10 +1,10 @@
 <?php
 
 use SneakyLenny\SourcedAttributes\Tests\Support\Casts\UppercaseCast;
-use SneakyLenny\SourcedAttributes\Tests\Support\Models\TestPerson;
+use SneakyLenny\SourcedAttributes\Tests\Support\Models\User;
 
 it('applies a built in cast to the sourced value', function () {
-    $target = TestPerson::create([
+    $target = User::create([
         'name' => 'Original Name',
     ]);
 
@@ -14,7 +14,7 @@ it('applies a built in cast to the sourced value', function () {
 });
 
 it('applies a custom cast class to the sourced value', function () {
-    $target = TestPerson::create([
+    $target = User::create([
         'name' => 'Original Name',
     ]);
 
@@ -24,7 +24,7 @@ it('applies a custom cast class to the sourced value', function () {
 });
 
 it('rejects non cast classes passed as a sourced cast', function () {
-    $target = TestPerson::create([
+    $target = User::create([
         'name' => 'Original Name',
     ]);
 

@@ -5,13 +5,11 @@ namespace SneakyLenny\SourcedAttributes\Tests\Support\Models;
 use Illuminate\Database\Eloquent\Model;
 use SneakyLenny\SourcedAttributes\Traits\HasSourcedAttributes;
 
-class TestPersonOverridesDisabled extends Model
+class User extends Model
 {
     use HasSourcedAttributes;
 
-    protected bool $overridesDefault = false;
-
-    protected $table = 'test_people';
+    protected $table = 'users';
 
     protected $guarded = [];
 
