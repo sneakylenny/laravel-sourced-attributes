@@ -28,6 +28,6 @@ it('rejects non cast classes passed as a sourced cast', function () {
         'name' => 'Original Name',
     ]);
 
-    expect(fn() => $target->sourceAttribute('name')->as('X', ['cast' => \stdClass::class]))
-        ->toThrow(\InvalidArgumentException::class, 'is not a valid Laravel cast');
+    expect(fn () => $target->sourceAttribute('name')->as('X', ['cast' => stdClass::class]))
+        ->toThrow(InvalidArgumentException::class, 'is not a valid Laravel cast');
 });

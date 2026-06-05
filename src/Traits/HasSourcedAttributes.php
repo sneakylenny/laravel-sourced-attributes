@@ -3,6 +3,7 @@
 namespace SneakyLenny\SourcedAttributes\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MissingAttributeException;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use InvalidArgumentException;
 use SneakyLenny\SourcedAttributes\PendingSourcedAttribute;
@@ -130,7 +131,7 @@ trait HasSourcedAttributes
     {
         try {
             $value = parent::getAttribute($key);
-        } catch (\Illuminate\Database\Eloquent\MissingAttributeException $exception) {
+        } catch (MissingAttributeException $exception) {
             if (! is_string($key) || $key === '' || ! $this->shouldResolveVirtualSourcedAttribute($key)) {
                 throw $exception;
             }
@@ -179,11 +180,11 @@ trait HasSourcedAttributes
         $modelClass = $this::class;
 
         $winnerValueSql = "select sa.value from {$sourceTable} as sa "
-            . "where sa.sourceable_type = ? "
-            . "and sa.sourceable_id = {$qualifiedKey} "
-            . "and sa.sourceable_attribute = ? "
-            . "order by sa.priority desc, sa.created_at desc, sa.id desc "
-            . "limit 1";
+            .'where sa.sourceable_type = ? '
+            ."and sa.sourceable_id = {$qualifiedKey} "
+            .'and sa.sourceable_attribute = ? '
+            .'order by sa.priority desc, sa.created_at desc, sa.id desc '
+            .'limit 1';
 
         return $query->whereRaw(
             "coalesce(({$winnerValueSql}), {$qualifiedAttribute}) {$operator} ?",

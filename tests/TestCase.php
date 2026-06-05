@@ -49,6 +49,6 @@ class TestCase extends Orchestra
             $table->timestamps();
         });
 
-        (include __DIR__ . '/../database/migrations/create_sourced_attributes_table.php.stub')->up();
+        (include __DIR__.'/../database/migrations/create_sourced_attributes_table.php.stub')->up();
     }
 }

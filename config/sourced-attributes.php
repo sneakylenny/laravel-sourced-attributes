@@ -1,11 +1,13 @@
 <?php
 
+use SneakyLenny\SourcedAttributes\Models\SourcedAttribute;
+
 return [
     // Database table used to store sourced attribute records.
     'table' => 'sourced_attributes',
 
     // Eloquent model class used for sourced attribute records.
-    'model' => SneakyLenny\SourcedAttributes\Models\SourcedAttribute::class,
+    'model' => SourcedAttribute::class,
 
     // Override resolution behavior.
     'overrides' => [

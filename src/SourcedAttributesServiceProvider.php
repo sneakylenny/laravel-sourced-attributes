@@ -4,10 +4,10 @@ namespace SneakyLenny\SourcedAttributes;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 use SneakyLenny\SourcedAttributes\Jobs\SyncSourcedAttributesFromOrigin;
 use SneakyLenny\SourcedAttributes\Models\SourcedAttribute;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 
 class SourcedAttributesServiceProvider extends PackageServiceProvider
 {
@@ -26,7 +26,7 @@ class SourcedAttributesServiceProvider extends PackageServiceProvider
 
     public function packageRegistered(): void
     {
-        $this->app->singleton(SourcedAttributes::class, fn(): SourcedAttributes => new SourcedAttributes);
+        $this->app->singleton(SourcedAttributes::class, fn (): SourcedAttributes => new SourcedAttributes);
     }
 
     public function packageBooted(): void
