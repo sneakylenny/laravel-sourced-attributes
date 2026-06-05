@@ -216,6 +216,19 @@ $people = Person::query()
 	->get();
 ```
 
+### Keep original values and load sourced relation
+
+```php
+$person = Person::query()
+    ->whereKey($id)
+    ->withSourcedAttributes(['name'])
+    ->first()
+    ->withoutOverrides();
+
+$person->name; // original value from people table
+$person->sourcedAttributes; // sourced rows with value/cast/meta/origin
+```
+
 ## Testing
 
 ```bash
