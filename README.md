@@ -5,6 +5,8 @@
 [![GitHub Code Style Action Status](https://github.com/sneakylenny/laravel-sourced-attributes/actions/workflows/fix-php-code-style-issues.yml/badge.svg)](https://github.com/sneakylenny/laravel-sourced-attributes/actions/workflows/fix-php-code-style-issues.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/sneakylenny/laravel-sourced-attributes.svg)](https://packagist.org/packages/sneakylenny/laravel-sourced-attributes)
 
+[![Laravel Sourced Attributes banner](.github/assets/readme-banner.svg)](https://packagist.org/packages/sneakylenny/laravel-sourced-attributes)
+
 Laravel Sourced Attributes lets you override Eloquent model attributes with values from either literal input or other model records.
 
 Overrides are persisted in a dedicated table, resolved deterministically (by priority and age), can be cast with Laravel casts, and can be synced from origin records when source data changes.
@@ -24,14 +26,6 @@ Overrides are persisted in a dedicated table, resolved deterministically (by pri
 - Optional auto-sync from origin updates, with optional queued execution.
 - Query helpers for effective values: `whereEffective()` and `whereEffectiveWhen()`.
 - Eager-loading helper for sourced records: `withSourcedAttributes()`.
-
-## Support us
-
-[![Laravel Sourced Attributes banner](.github/assets/readme-banner.svg)](https://packagist.org/packages/sneakylenny/laravel-sourced-attributes)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
 
 ## Installation
 
